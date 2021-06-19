@@ -1,9 +1,10 @@
 import glob
+import os
+import logging
+logger = logging.getLogger(__name__)
 
 from link_extractor import LinkExtractor
 from storage import FileStorage
-import logging
-logger = logging.getLogger(__name__)
 
 def test():
     # Load a sample HTML file
@@ -43,11 +44,15 @@ if __name__ == '__main__':
 
     # Full run
     # Name this run
-    run_name = "run2"
+    run_name = "run1"
     base_url = 'https://www.kannadaprabha.com/'
     website_base_dir = '/home/adiga/my_work/kannada-news-dataset/crawling/snapshot_download/kannadaprabha/run1/websites/www.kannadaprabha.com/'
 
-    output_storage_dir = '/home/adiga/my_work/kannada-news-dataset/crawling/sample_output/'
-    fs = FileStorage(output_storage_dir + 'extracted_links.txt')
+    output_base_dir = '/home/adiga/my_work/kannada-news-dataset/crawling/sample_output/'
+    output_run_dir = os.path.join(output_base_dir, run_name)
+    if not os.path.exists(output_run_dir):
+        os.makedirs(output_run_dir)
+
+    fs = FileStorage(os.path.join(output_run_dir, 'extracted_links.txt'))
     extractor = LinkExtractor(fs)
     run_full(run_name, base_url, website_base_dir, extractor)
