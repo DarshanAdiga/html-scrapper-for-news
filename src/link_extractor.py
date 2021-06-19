@@ -1,17 +1,15 @@
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s')
 
-class FileStorage:
-    def __init__(self):
-        pass
+logger = logging.getLogger(__name__)
     
-    def write_line(self, line):
-        # TODO
-        print('Write:', line)
-    
+from storage import StorageI
+
 class LinkExtractor:
-    def __init__(self, storage: FileStorage=None):
-        pass
+    def __init__(self, storage: StorageI=None):
+        self.storage = storage
     
     def __extract_from_anchors(self, html_doc):
         link_set = set()
@@ -32,13 +30,29 @@ class LinkExtractor:
         links = self.__to_absolute_links(links, base_url)
         return links
 
+    def extract_save(self, html_text, base_url):
+        """Extracts the links using 'extract()' method and saves those links
+        to the storage"""
+
+        if not self.storage:
+            logger.error('No Storage object defined!')
+            exit(1)
+        
+        # Extract the links
+        links = self.extract(html_text, base_url)
+        
+        # Then save the links
+        for ln in links:
+            self.storage.write_line(ln)
+        logger.info('Stored {} links successfully'.format(len(links)))
+
     def __to_absolute_links(self, links, base_url):
         """Convert the relative links, if any, in the given list of links,
          to absolute and valid links and return the list"""
         abs_link_set = set()
         for ln in links:
             if not str(ln).startswith("http"):
-                #print('Warn:Relative link found:: {}'.format(ln))
+                logger.debug('Relative link found:: {}'.format(ln))
                 # Convert relative to absolute
                 new_url = urljoin(base_url, ln)
             else:
