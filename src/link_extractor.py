@@ -1,10 +1,9 @@
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s')
-
 logger = logging.getLogger(__name__)
     
+from es_doc_maker import make_extracted_url_doc
 from storage import StorageI
 
 class LinkExtractor:
@@ -42,9 +41,10 @@ class LinkExtractor:
             logger.error('No Storage object defined!')
             exit(1)
         
-        # Then save the links
-        for ln in links:
-            self.storage.write_line(ln)
+        # Prepare a doc to be saved
+        documents = [make_extracted_url_doc(ln) for ln in links]
+        # Save
+        self.storage.save_documents(documents)
         logger.info('Stored {} links successfully'.format(len(links)))
 
     def __filter_links(self, links, filter_domains):

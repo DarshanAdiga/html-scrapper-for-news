@@ -1,0 +1,20 @@
+# Configurations
+elastic_test:
+  index: test123
+  doc_type: urls
+  host: localhost
+  port: 9200
+
+# To store the extracted URLs
+extracted_url_index:
+  index: run1_extracted_url
+  doc_type: url
+  host: localhost
+  port: 9200
+
+# To store the paths of already existing HTML page urls
+existing_html_path_index:
+  index: run1_existing_html_path
+  doc_type: html_path
+  host: localhost
+  port: 9200
