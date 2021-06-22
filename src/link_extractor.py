@@ -3,7 +3,7 @@ from urllib.parse import urljoin, urlparse
 import logging
 logger = logging.getLogger(__name__)
     
-from es_doc_maker import make_extracted_url_doc
+from es_doc_maker import make_url_doc
 from storage import StorageI
 
 class LinkExtractor:
@@ -42,7 +42,7 @@ class LinkExtractor:
             exit(1)
         
         # Prepare a doc to be saved
-        documents = [make_extracted_url_doc(ln) for ln in links]
+        documents = [make_url_doc(ln, downloaded=False) for ln in links]
         # Save
         self.storage.save_documents(documents)
         logger.info('Stored {} links successfully'.format(len(links)))

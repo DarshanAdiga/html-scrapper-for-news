@@ -28,6 +28,6 @@ docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL 
 
 ## TODO
 [X] Index the URLs (along with origin-page URL for reference)
-* Mark if HTML is already downloaded or not
+[X] Mark if HTML is already downloaded or not
 * Crawl the uncrawled URLs and save HTML
 * Extract "VALID and USEFUL" Kannada Text from all the HTML pages (Avoid small texts, duplicate text snippets?) 
