@@ -24,3 +24,5 @@ url_index:
   host: localhost
   port: 9200
 
+log_config:
+  level: 'DEBUG' # Possible values: 'WARNING', 'INFO', 'DEBUG'

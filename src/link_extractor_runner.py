@@ -46,7 +46,7 @@ def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
         url_storage.save_doc(doc)
         
         # Extract links
-        html_file = open(html_file_path, 'r')
+        html_file = open(html_file_path, 'rb')
         html_text = html_file.read()
         links = extractor.extract(html_text, base_url, filter_domains)
         extractor.save_links(links)
@@ -54,8 +54,6 @@ def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
     logger.info("Completed {}".format(run_name))
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARN, format='%(asctime)s :: %(levelname)s :: %(message)s')
-
     ##TEST case 
     # test()
 
