@@ -60,11 +60,14 @@ if __name__ == '__main__':
     # test()
 
     # Full run
+    # Load the config
+    run_config = conf_parser.SYS_CONFIG['run_config']
+
     # Name this run
-    run_name = 'run1'
-    base_url = 'https://www.kannadaprabha.com/'
-    filter_domains = ['kannadaprabha']
-    website_base_dir = '/home/adiga/my_work/kannada-news-dataset/crawling/snapshot_download/kannadaprabha/run1/websites/www.kannadaprabha.com/'
+    run_name = run_config['run_name']
+    base_url = run_config['base_url']
+    website_base_dir = run_config['website_base_dir']
+    filter_domains = run_config['filter_domains']
 
     # The ElasticSearch storage indices
     url_storage = ESStorage(conf_parser.SYS_CONFIG['url_index'])

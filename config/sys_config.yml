@@ -1,9 +1,21 @@
-# Configurations
+# All Configurations
+
+#----------
+# Test config
 elastic_test:
   index: test123
   doc_type: urls
   host: localhost
   port: 9200
+
+#----------
+# Run Configurations
+run_config:
+  run_name: run1
+  base_url: https://www.kannadaprabha.com/
+  website_base_dir: /home/adiga/my_work/kannada-news-dataset/crawling/snapshot_download/kannadaprabha/run1/websites/www.kannadaprabha.com/
+  filter_domains:
+    - 'kannadaprabha'
 
 # To store the URLs
 url_index:
@@ -11,3 +23,4 @@ url_index:
   doc_type: url
   host: localhost
   port: 9200
+
