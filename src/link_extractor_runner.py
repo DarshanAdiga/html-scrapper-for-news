@@ -38,18 +38,26 @@ def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
     for html_file_path in all_html_paths:
         logger.debug('-'*20)
         logger.debug(html_file_path)
+
         # Get the relative path of the HTML file and convert it into a valid URL
         relative_path = html_file_path.replace(website_base_dir, '')
         html_url = urljoin(base_url, relative_path)
-        # Prepare the doc to be saved
-        doc = make_url_doc(html_url, downloaded=True)
-        url_storage.save_doc(doc)
-        
-        # Extract links
-        html_file = open(html_file_path, 'rb')
-        html_text = html_file.read()
-        links = extractor.extract(html_text, base_url, filter_domains)
-        extractor.save_links(links)
+
+        # if html_file_path is a directory, then simply save it as a undownloaded-HTML url
+        if os.path.isdir(html_file_path):
+            # Prepare and save the URL doc
+            doc = make_url_doc(html_url, downloaded=False)
+            url_storage.save_doc(doc)
+        else:    
+            # Prepare and save the URL doc
+            doc = make_url_doc(html_url, downloaded=True)
+            url_storage.save_doc(doc)
+            
+            # Extract links
+            html_file = open(html_file_path, 'rb')
+            html_text = html_file.read()
+            links = extractor.extract(html_text, base_url, filter_domains)
+            extractor.save_links(links)
     
     logger.info("Completed {}".format(run_name))
 

@@ -4,8 +4,13 @@ This project includes various code bases used to acquire, clean, and structure t
 ## Link Extractor
 This component loads the website-dump from local disk, extracts and cleans all the valid HTML URLs. The extracted links are then indexed as well. 
 
+## Preprocessing
+The `src/util/` folder includes various cleanup scripts to be run on the website dump, before running the extractors.
+1. To fix the directories with name ending with `.html` and contains `index.html` inside it, use `src/util/move_html_directory_to_file.py`
+
+
 ## Entry Point
-```src/link_extractor_runner.py```
+```python src/link_extractor_runner.py```
 
 ## Storage
 ElasticSearch is used to store the extracted URLs and the text data. Separate indexes are used for different purposes.
