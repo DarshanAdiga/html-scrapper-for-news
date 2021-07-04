@@ -1,28 +1,27 @@
 # All Configurations
-
-#----------
-# Test config
-elastic_test:
-  index: test123
-  doc_type: urls
-  host: localhost
-  port: 9200
-
-#----------
+#-------------------
 # Run Configurations
 run_config:
-  run_name: run1
+  run_name: run2
   base_url: https://www.kannadaprabha.com/
-  website_base_dir: /home/adiga/my_work/kannada-news-dataset/crawling/snapshot_download/kannadaprabha/run1/websites/www.kannadaprabha.com/
+  website_enum: 'kannadaprabha' # Website identifier
+  website_base_dir: /home/ubuntu/work/darshan/kn-work/kannadaprabha/run2/websites/www.kannadaprabha.com/
   filter_domains:
     - 'kannadaprabha'
 
 # To store the URLs
 url_index:
-  index: run1_seed_urls
+  index: run2_seed_urls
   doc_type: url
   host: localhost
   port: 9200
 
+article_index:
+  index: run2_articles
+  doc_type: article
+  host: localhost
+  port: 9200
+
 log_config:
-  level: 'DEBUG' # Possible values: 'WARNING', 'INFO', 'DEBUG'
+  level: 'WARNING' # Possible values: 'WARNING', 'INFO', 'DEBUG'
+  error_log_file: 'logs/run2_error.log'

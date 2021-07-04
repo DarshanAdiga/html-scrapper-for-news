@@ -1,5 +1,7 @@
 import elasticsearch
 from elasticsearch import Elasticsearch
+from elasticsearch.helpers import scan
+from elasticsearch.client import IndicesClient
 import json
 import conf_parser
 import traceback
@@ -25,6 +27,10 @@ class ESHelper():
         es = Elasticsearch([{'host': self.elastic_conf['host'], 'port': self.elastic_conf['port']}])
         logger.info('Connected to Elastic Search:' + str(es.ping()))
         return es
+
+    def index_exists(self):
+        """Check if index exists or not"""
+        return IndicesClient(self.es).exists(self.index)
 
     def index_doc(self, doc):
         # Use doc specific id while indexing to avoid duplication
@@ -52,7 +58,10 @@ class ESHelper():
         """
         Return the total number of docs present in the index
         """
-        return self.es.indices.stats()['indices'][self.index]['total']['docs']['count']
+        if self.index_exists():
+            return self.es.indices.stats()['indices'][self.index]['total']['docs']['count']
+        else:
+            return 0
 
     def doc_by_id(self, id):
         """
@@ -70,6 +79,13 @@ class ESHelper():
         documents = [src['_source'] for src in res['hits']['hits']]
         return documents
 
+    def bulk_scroll(self, json_query):
+        """Fetch all the documents from the index using a scroll option.
+        Returns an iterator which gives out all the documents! Becareful about this guy!"""
+        # TODO Wait for 15 mins max before cleaning the scroll
+        result_itr = scan(self.es, query=json_query, scroll='15m', size=1000)
+        return result_itr
+
     def delete_index(self):
         """Deletes the given index! Use with caution!"""
         logger.warning("Going to DELETE the index {0} permanently!".format(self.index))
@@ -81,7 +97,21 @@ if __name__ == "__main__":
     # Testing
     elastic_conf = conf_parser.SYS_CONFIG['elastic_test']
     esh = ESHelper(elastic_conf)
-    esh.index_documents([{'id': '123', 'url': 'https://test.com'}])
+    
+    print('Index Exists:', esh.index_exists())
+    #esh.index_documents([{'id': '123', 'url': 'https://test.com'}])
+
+    q_body={"_source": ["downloaded"],
+            "query": {"bool": {"must": [{"term": {"downloaded": "true"} }] } } }
+    
+    res_itr = esh.bulk_scroll(q_body)
+    cnt=0
+    for ri in res_itr:
+        cnt += 1
+        if cnt > 1000:
+            print('More than 1k')
+            break
+        print(ri)
 
     # For cleaning the ES
     #esh.delete_index()
