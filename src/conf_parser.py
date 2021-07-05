@@ -1,10 +1,10 @@
 import yaml
 
 # For testing
-SYS_CONFIG=yaml.load(open('config/test_sys_config.yml', 'r'))
+# SYS_CONFIG=yaml.load(open('config/test_sys_config.yml', 'r'))
 
 # Actual run
-#SYS_CONFIG=yaml.load(open('config/sys_config.yml', 'r'))
+SYS_CONFIG=yaml.load(open('config/sys_config.yml', 'r'))
 
 # Configure logging
 import logging

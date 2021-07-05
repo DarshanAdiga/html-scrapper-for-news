@@ -65,11 +65,14 @@ class ArticleParser():
             keywords = parser.extract_keywords()
             pub_date = parser.extract_publish_date()
             art_text = parser.extract_article_text()
-            # Make the document
-            article_doc = make_article_doc(url, title, desc, keywords, pub_date, art_text)
-            return article_doc
-        else:
-            return None
+
+            if art_text is not None:
+                # Make the document
+                article_doc = make_article_doc(url, title, desc, keywords, pub_date, art_text)
+                return article_doc
+        
+        # In case of failures
+        return None
 
 class ArticleExtractor():
     def __init__(self, seed_storage: StorageI, article_storage: StorageI, \
@@ -144,6 +147,9 @@ class ArticleExtractor():
                         # if article_doc is not None, accumulate it
                         if article_doc is not None:
                             article_batch.append(article_doc)
+                        else:
+                            conf_parser.error_logger.error("Empty artilce:{}".format(d_url))
+
                         if len(article_batch) >= self.save_batch_limit:
                             self.__save_article_batch(article_batch)
                             article_batch = [] # Clear the batch
@@ -158,6 +164,7 @@ class ArticleExtractor():
 
         # Save the residual article_doc in the list
         self.__save_article_batch(article_batch)
+        logger.info("Done processing")
 
 def run_extractor():
     seed_url_config = conf_parser.SYS_CONFIG['url_index']

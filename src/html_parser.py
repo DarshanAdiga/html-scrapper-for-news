@@ -33,6 +33,10 @@ class KannadaPrabhaParser(HtmlParserI):
         # logger.debug('Valid article page: {}'.format(self.is_valid_article_page()))
 
     def is_valid_article_page(self):
+        if self.soup.head is None:
+            conf_parser.error_logger.error("Invalid Article! Couldn't detect article validity:{}".format(self.url))
+            return False
+
         page_type = self.soup.head.find_all('meta', attrs={"property": "og:type"})
         if len(page_type) == 1:
             page_type = page_type[0]
@@ -46,6 +50,9 @@ class KannadaPrabhaParser(HtmlParserI):
 
         else:
             logger.debug('Page does not seem to contain article: {}'.format(self.url))
+
+        # For debugging these pages
+        conf_parser.error_logger.error("Invalid Article! {}".format(self.url))
         return False
 
 
@@ -78,7 +85,7 @@ class KannadaPrabhaParser(HtmlParserI):
     def extract_keywords(self):
         # Most commonly found in meta
         news_keywords = self.soup.find("meta", attrs={"name": "news_keywords"})
-        if news_keywords is not None:
+        if news_keywords is not None and "content" in news_keywords.attrs:
             return news_keywords["content"]
         
         # Alternate way
@@ -130,22 +137,28 @@ class KannadaPrabhaParser(HtmlParserI):
         div_article_text = self.soup.find("div", class_="div_article_text")
         if div_article_text is not None:
             span = div_article_text.find("span")
-            if span is not None:
+            if span is not None and span.text is not None:
                 return span.text
         
         # Alternate way 1
         story_content = self.soup.find("div", id="storyContent")
         if story_content is not None:
             # Remove the divs with class="author_txt" and class="agency_txt"
-            story_content.find("div", class_="author_txt").clear()
-            story_content.find("div", class_="agency_txt").clear()
-            return story_content.text
+            author_txt = story_content.find("div", class_="author_txt")
+            if author_txt is not None:
+                author_txt.clear()
+            agency_txt = story_content.find("div", class_="agency_txt")
+            if agency_txt is not None:
+                agency_txt.clear()
+
+            if story_content.text is not None:
+                return story_content.text
 
         # Alternate way 2
         article_text = self.soup.find('div', class_="article_text")
         if article_text is not None:
             span = article_text.find('span')
-            if span is not None:
+            if span is not None and span.text is not None:
                 return span.text
             
         # Last option
