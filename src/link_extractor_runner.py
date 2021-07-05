@@ -48,16 +48,16 @@ def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
             # Prepare and save the URL doc
             doc = make_url_doc(html_url, downloaded=False)
             url_storage.save_doc(doc)
-        else:    
-            # Prepare and save the URL doc
-            doc = make_url_doc(html_url, downloaded=True)
-            url_storage.save_doc(doc)
-            
+        else:
             # Extract links
             html_file = open(html_file_path, 'rb')
             html_text = html_file.read()
             links = extractor.extract(html_text, base_url, filter_domains)
             extractor.save_links(links)
+
+            # Prepare and save the URL doc(Do this at the end, so that we over-write downloaded=True)
+            doc = make_url_doc(html_url, downloaded=True)
+            url_storage.save_doc(doc)
     
     logger.info("Completed {}".format(run_name))
 
