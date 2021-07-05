@@ -120,12 +120,15 @@ class ArticleExtractor():
             "query": {"bool": {"must": [{"term": {"downloaded": "true"} }] } } }
         # Do a bulk-scroll here
         downloaded_url_itr = self.seed_storage.get_documents(es_query_downloaded, bulk_scroll=True)
-        
+        downloaded_count = 0
+        extracted_count = 0
+
         # Find the downloaded URLs whose article has not been extracted
         article_batch = []
         for doc in downloaded_url_itr:
             # Get the url from doc
             d_url = doc['_id']
+            downloaded_count += 1
 
             if self.url_lookup.url_exists(d_url):
                 # Article is already extracted, Nothing to do here
@@ -147,6 +150,7 @@ class ArticleExtractor():
                         # if article_doc is not None, accumulate it
                         if article_doc is not None:
                             article_batch.append(article_doc)
+                            extracted_count += 1
                         else:
                             conf_parser.error_logger.error("Empty artilce:{}".format(d_url))
 
@@ -164,7 +168,7 @@ class ArticleExtractor():
 
         # Save the residual article_doc in the list
         self.__save_article_batch(article_batch)
-        logger.info("Done processing")
+        logger.info("Done processing. Downloaded urls:{0}. Extracted urls:{1}".format(downloaded_count, extracted_count))
 
 def run_extractor():
     seed_url_config = conf_parser.SYS_CONFIG['url_index']
