@@ -48,6 +48,7 @@ def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
             # Prepare and save the URL doc
             doc = make_url_doc(html_url, downloaded=False)
             url_storage.save_doc(doc)
+            conf_parser.error_logger.error("Directory with '.html' extension found: {}".format(html_file_path))
         else:
             # Extract links
             html_file = open(html_file_path, 'rb')

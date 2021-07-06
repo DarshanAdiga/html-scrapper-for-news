@@ -2,6 +2,7 @@ import elasticsearch
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 from elasticsearch.client import IndicesClient
+from elasticsearch.exceptions import ConflictError
 import json
 import conf_parser
 import traceback
@@ -32,18 +33,30 @@ class ESHelper():
         """Check if index exists or not"""
         return IndicesClient(self.es).exists(self.index)
 
-    def index_doc(self, doc):
-        # Use doc specific id while indexing to avoid duplication
-        self.es.index(index=self.index, doc_type=self.doc_type, id=doc['id'], body=doc)
+    def index_doc(self, doc, update_if_exists=False):
+        if update_if_exists:
+            OP_TYPE = "index" # Create or update
+        else:
+            OP_TYPE = "create" # Create only if absent
 
-    def index_documents(self, documents):
+        try:
+            # Use doc specific id while indexing to avoid duplication
+            return self.es.index(index=self.index, doc_type=self.doc_type, id=doc['id'], body=doc, op_type=OP_TYPE)
+        except ConflictError as c_error:
+            conf_parser.error_logger.error("Indexing failed! Duplicate document: {}".format(doc))
+        
+        return None
+
+    def index_documents(self, documents, update_if_exists=False):
         """
         Indexes the given list of documents onto the configured index
         """
         drop_count = 0
         for doc in documents:
             try:
-                self.index_doc(doc)
+                resp_doc = self.index_doc(doc, update_if_exists=update_if_exists)
+                if resp_doc is None:
+                    drop_count += 1
             except KeyError:
                 drop_count += 1
                 traceback.print_exc()
@@ -51,7 +64,7 @@ class ESHelper():
                 drop_count += 1
                 traceback.print_exc()
 
-        logger.info('Indexed {0} Dropped {1}'.format(len(documents)-drop_count, drop_count))
+        logger.warning('## Indexed {0} Dropped {1}'.format(len(documents)-drop_count, drop_count))
         logger.info('Current index size {0}'.format(self.get_index_size()))
 
     def get_index_size(self):
@@ -92,6 +105,9 @@ class ESHelper():
         self.es.indices.delete(index=self.index)
         logger.info("Deleted {}".format(self.index))
 
+    def close(self):
+        self.es.close()
+
 
 if __name__ == "__main__":    
     # Testing
@@ -101,18 +117,28 @@ if __name__ == "__main__":
     print('Index Exists:', esh.index_exists())
     #esh.index_documents([{'id': '123', 'url': 'https://test.com'}])
 
-    q_body={"_source": ["downloaded"],
-            "query": {"bool": {"must": [{"term": {"downloaded": "true"} }] } } }
+    # print('>>', esh.index_doc({'key':1, 'id': 123}, update_if_exists=True))
+    # print('>>', esh.index_doc({'key':1, 'id': 123}, update_if_exists=True))
+    # print('>>', esh.index_doc({'key':1, 'id': 234}, update_if_exists=True))
+    # print('>>', esh.index_doc({'key':2, 'id': 123}, update_if_exists=True))
+
+    # esh.index_documents([{'key':1, 'id': 123}, {'key':1, 'id': 123}, {'key':1, 'id': 234}])
     
-    res_itr = esh.bulk_scroll(q_body)
-    cnt=0
-    for ri in res_itr:
-        cnt += 1
-        if cnt > 1000:
-            print('More than 1k')
-            break
-        print(ri)
+    # q_body={"_source": ["downloaded"],
+    #         "query": {"bool": {"must": [{"term": {"downloaded": "true"} }] } } }
+    
+    # res_itr = esh.bulk_scroll(q_body)
+    # cnt=0
+    # for ri in res_itr:
+    #     cnt += 1
+    #     if cnt > 1000:
+    #         print('More than 1k')
+    #         break
+    #     print(ri)
 
     # For cleaning the ES
-    #esh.delete_index()
+    # esh.delete_index()
+
+    # Close the connection
+    esh.close()
     

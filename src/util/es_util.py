@@ -1,6 +1,7 @@
 # Code to fix the importing of submodules
 from pathlib import Path
 import sys
+import json
 if __package__ is None:                  
     DIR = Path(__file__).resolve().parent
     sys.path.insert(0, str(DIR.parent))
@@ -23,7 +24,11 @@ es_query_downloaded = {
 downloaded_url_itr = es_seed_storage.get_documents(es_query_downloaded, bulk_scroll=True)
 downloaded_count = 0
 
+# Save the results to a temp file
+write_file = open('logs/dump.jl', 'w')
 for doc in downloaded_url_itr:
     downloaded_count += 1
+    write_file.write(json.dumps(doc) + '\n')
 
+es_seed_storage.close()
 print("Count of docs with 'downloaded'=True: {}".format(downloaded_count))

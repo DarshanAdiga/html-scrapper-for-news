@@ -27,15 +27,15 @@ class ESStorage(StorageI):
             return True
         return False
 
-    def save_doc(self, doc):
+    def save_doc(self, doc, update_if_exists=False):
         """Index the doc"""
         self.__check_writeability()
-        self.eshelper.index_doc(doc)
+        return self.eshelper.index_doc(doc, update_if_exists)
 
-    def save_documents(self, documents):
+    def save_documents(self, documents, update_if_exists=False):
         """Index multile documents"""
         self.__check_writeability()
-        self.eshelper.index_documents(documents)
+        self.eshelper.index_documents(documents, update_if_exists)
 
     def get_doc_by_id(self, id):
         """Get a document by id"""
@@ -51,4 +51,4 @@ class ESStorage(StorageI):
             return self.eshelper.search(query)
 
     def close(self):
-        pass
+        self.eshelper.close()
