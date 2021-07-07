@@ -58,7 +58,13 @@ def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
 
             # Prepare and save the URL doc(Do this at the end, so that we over-write downloaded=True)
             doc = make_url_doc(html_url, downloaded=True)
-            url_storage.save_doc(doc)
+            resp_doc = url_storage.save_doc(doc)
+            if resp_doc is None:
+                # That means doc with id already exists, 
+                # So overwrite it if original doc's downloaded is False, because
+                # we have found the HTML for it now
+                url_storage.save_doc(doc, update_if_exists=True)
+
     
     logger.info("Completed {}".format(run_name))
 
