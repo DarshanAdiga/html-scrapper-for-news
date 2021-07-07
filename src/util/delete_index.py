@@ -11,7 +11,7 @@ import conf_parser
 from es_helper import ESHelper
 import time
 
-elastic_conf = conf_parser.SYS_CONFIG['url_index']
+elastic_conf = conf_parser.SYS_CONFIG['dummy']
 esh = ESHelper(elastic_conf)
 
 print('GOING TO DELETE {}'.format(esh.get_index_name()))
