@@ -39,10 +39,6 @@ docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL 
 
 ## TODO
 [X] Index the URLs (along with origin-page URL for reference)
-[X] Mark if HTML is already downloaded or not
-* Extract and save
-  * Article's Full Text
-  * Article's Title, Summary/Description, Publish Date, Keywords
-  * Use multiple extraction approaches to deal with multitude of article page layouts over a period of time
-  * Avoid small texts, duplicate text snippets
+[X] Fix common issues in article-extraction
+* Avoid small texts, duplicate text snippets
 * Crawl the uncrawled URLs and save HTML

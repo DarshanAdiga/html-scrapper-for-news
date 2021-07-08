@@ -1,8 +1,12 @@
 from enum import Enum
 import re
 from bs4 import BeautifulSoup
+import bs4
+
 import logging
 logger = logging.getLogger(__name__)
+bs4_logger = logging.getLogger("bs4.dammit")
+bs4_logger.setLevel(logging.INFO)
 
 import conf_parser
 

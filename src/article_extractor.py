@@ -1,4 +1,5 @@
 import os
+import re
 import traceback
 import time
 from es_storage import ESStorage
@@ -34,7 +35,7 @@ class URLLookup():
         start = time.time()
         # Get the URLs from the query results
         self.extracted_url_set = {e_url['_id'] for e_url in extracted_url_itr}
-        logger.info("Done. Time taken:{} seconds".format(time.time()-start))
+        logger.info("Done. Have {0} urls in lookup index. Time taken:{1} seconds".format(len(self.extracted_url_set), time.time()-start))
 
     def url_exists(self, url):
         """Check if the given url already exists in the article_storage or not"""
@@ -76,7 +77,7 @@ class ArticleParser():
 
 class ArticleExtractor():
     def __init__(self, seed_storage: StorageI, article_storage: StorageI, \
-        website: Website, html_base_path: str, save_batch_limit = 1000):
+        website: Website, website_base_dir: str, base_url: str, save_batch_limit = 1000):
         """Extract the articles from those URLs from seed_storage whose HTML is already
          downloaded and save the article document to article_storage.
 
@@ -84,26 +85,31 @@ class ArticleExtractor():
             seed_storage (StorageI): Storage containing the seed urls
             article_storage (StorageI): Storage where article doc should be saved
             website (Website): Website name, used to do determine the appropriate parser
-            html_base_path (str): The base path of the downloaded HTML file on the local storage
+            website_base_dir (str): The base path of the downloaded HTML file on the local storage
+            base_url (str): The base URL of all the urls
             save_batch_limit (int): Num of article docs to be batched to save in one go
         """
         self.seed_storage = seed_storage
         self.article_storage = article_storage
-        self.html_base_path = html_base_path
+        self.website_base_dir = website_base_dir
+        self.base_url = base_url
         self.save_batch_limit = save_batch_limit
 
         self.url_lookup = URLLookup(self.article_storage)
         self.article_parser = ArticleParser(website)
 
-    def __get_html_text(self, parsed_url: ParseResult):
+    def __get_html_text(self, d_url: str):
+        # To avoid confusions
+        url_ = d_url.replace("http://", "https://")
         # Remove the base path
-        rel_path = parsed_url.path.lstrip("/") # Remove the first '/' in the path
-        html_file_path = os.path.join(self.html_base_path, rel_path)
+        relative_path = url_.replace(self.base_url, '')
+        relative_path = relative_path.lstrip("/") # Remove the first '/' in the path, if exists
+        html_file_path = os.path.join(self.website_base_dir, relative_path)
         if os.path.isfile(html_file_path):
             # Path exists and it is a file, read the text
             return open(html_file_path, 'rb').read()
         else:
-            logger.warning("The html file {0} does not exist for the URL {1}".format(html_file_path, parsed_url.geturl()))
+            logger.warning("The html file {0} does not exist for the URL {1}".format(html_file_path, d_url))
             return None
 
     def __save_article_batch(self, article_batch):
@@ -137,10 +143,9 @@ class ArticleExtractor():
                 # Catch any kind of exception here and just log it and move on
                 try:
                     logger.debug("Going to extract and index the article from {}".format(d_url))
-                    parsed_url = urlparse(d_url)
 
                     # Get the downloaded HTML text
-                    html_text = self.__get_html_text(parsed_url)
+                    html_text = self.__get_html_text(d_url)
                     if html_text is not None:
                         # Extract the article details
                         article_doc = self.article_parser.extract_article(html_text, d_url)
@@ -179,7 +184,8 @@ def run_extractor():
     run_config = conf_parser.SYS_CONFIG['run_config']
     website_enum = Website(run_config['website_enum'])
     website_base_dir = run_config['website_base_dir']
-    art_extractor = ArticleExtractor(seed_storage, article_storage, website_enum, website_base_dir)
+    base_url = run_config['base_url']
+    art_extractor = ArticleExtractor(seed_storage, article_storage, website_enum, website_base_dir, base_url)
     art_extractor.extract_and_save_pending_articles()
 
 if __name__ == '__main__':
