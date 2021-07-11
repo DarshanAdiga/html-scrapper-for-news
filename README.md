@@ -40,5 +40,7 @@ docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL 
 ## TODO
 [X] Index the URLs (along with origin-page URL for reference)
 [X] Fix common issues in article-extraction
+  [ ] Space in the html file paths! During extraction:
+      Ex: "cricket/rishabh-pant-surpasses-ms dhoni-creates-another-record/330223.html"
 * Avoid small texts, duplicate text snippets
 * Crawl the uncrawled URLs and save HTML

@@ -1,0 +1,27 @@
+# All Configurations
+#-------------------
+# Run Configurations
+run_config:
+  run_name: run3
+  base_url: https://www.prajavani.net/
+  website_enum: 'prajavani' # Website identifier
+  website_base_dir: /home/ubuntu/work/darshan/kn-work/prajavani/run3/websites/www.prajavani.net/
+  filter_domains:
+    - 'prajavani'
+
+# To store the URLs
+url_index:
+  index: run3_seed_urls
+  doc_type: url
+  host: localhost
+  port: 9200
+
+article_index:
+  index: run3_articles
+  doc_type: article
+  host: localhost
+  port: 9200
+
+log_config:
+  level: 'WARNING' # Possible values: 'WARNING', 'INFO', 'DEBUG'
+  error_log_file: 'logs/run3_error.log'
