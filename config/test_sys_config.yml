@@ -2,7 +2,6 @@
 #----------
 elastic_test:
   index: test123
-  doc_type: urls
   host: localhost
   port: 9200
 
@@ -19,13 +18,11 @@ run_config:
 # To store the URLs
 url_index:
   index: url_test
-  doc_type: url
   host: localhost
   port: 9200
 
 article_index:
   index: article_test
-  doc_type: article
   host: localhost
   port: 9200
 

@@ -16,7 +16,7 @@ class ESHelper():
         self.elastic_conf = elastic_conf
         self.es = self.__init_es()
         self.index = elastic_conf['index']
-        self.doc_type = elastic_conf['doc_type']
+        self.doc_type = self.index # use the index name itself
 
     def get_index_name(self):
         return self.index
@@ -86,7 +86,7 @@ class ESHelper():
         """
         Search the index using given json_query and return the list of article objects
         """
-        res = self.es.search(index=self.index, body=json_query)
+        res = self.es.search(index=self.index, doc_type=self.doc_type, body=json_query)
         #print(json.dumps(res, indent=2))
         # Process the results and return the documents only
         documents = [src['_source'] for src in res['hits']['hits']]
@@ -96,7 +96,7 @@ class ESHelper():
         """Fetch all the documents from the index using a scroll option.
         Returns an iterator which gives out all the documents! Becareful about this guy!"""
         # TODO Wait for 15 mins max before cleaning the scroll
-        result_itr = scan(self.es, query=json_query, scroll='15m', size=1000)
+        result_itr = scan(self.es, index=self.index, doc_type=self.doc_type, query=json_query, scroll='15m', size=1000)
         return result_itr
 
     def delete_index(self):

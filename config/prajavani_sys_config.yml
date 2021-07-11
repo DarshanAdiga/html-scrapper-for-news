@@ -12,13 +12,11 @@ run_config:
 # To store the URLs
 url_index:
   index: run3_seed_urls
-  doc_type: url
   host: localhost
   port: 9200
 
 article_index:
   index: run3_articles
-  doc_type: article
   host: localhost
   port: 9200
 
