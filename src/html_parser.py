@@ -27,6 +27,7 @@ class HtmlParserI():
 
 class Website(Enum):
     KANNADAPRABHA='kannadaprabha'
+    PRAJAVANI='prajavani'
     # TODO Other websites go here
 
 class KannadaPrabhaParser(HtmlParserI):
@@ -168,8 +169,124 @@ class KannadaPrabhaParser(HtmlParserI):
         # Last option
         return None
 
+class PrajavaniParser():
+    """Interface that declares various extraction methods"""
+    def __init__(self, html_text, url):
+        self.soup = BeautifulSoup(html_text, "html.parser")
+        self.url = url
+
+    def is_valid_article_page(self):
+        if self.soup.head is None:
+            conf_parser.error_logger.error("Invalid Article! Couldn't detect article validity:{}".format(self.url))
+            return False
+
+        page_type = self.soup.head.find_all('meta', attrs={"property": "og:type"})
+        if len(page_type) == 1:
+            page_type = page_type[0]
+            og_type = page_type['content']
+            logger.debug('Og Type: {}'.format(og_type))
+            # Check the content type
+            if og_type == 'article':
+                return True
+            else:
+                logger.debug("Og Type is not 'article' for this url!")
+
+        else:
+            logger.debug('Page does not seem to contain article: {}'.format(self.url))
+
+        # For debugging these pages
+        conf_parser.error_logger.error("Invalid Article! {}".format(self.url))
+        return False
+
+    def extract_title(self):
+        # Most commonly found title
+        pj_article_title = self.soup.find("div", attrs={"class": "pj-article__title"})
+        if pj_article_title is not None:
+            h1 = pj_article_title.find("h1")
+            if h1 is not None:
+                return h1.text
+            else:
+                return pj_article_title.text
+
+        # Alternate way 1
+        meta = self.soup.find("meta", attrs={"property": "og:title"})
+        if meta is not None and "content" in meta.attrs:
+            return meta["content"]
+        
+        # Last option
+        return self.soup.find("title").string
+
+    def extract_description(self):
+        # Most commonly found in meta
+        meta_desc = self.soup.find("meta", attrs={"property": "og:description"})
+        if meta_desc is not None and "content" in meta_desc.attrs:
+            return meta_desc["content"]
+        
+        # Last option
+        return None
+
+    def extract_keywords(self):
+        # Most commonly found
+        div_article_tags = self.soup.find("div", class_=re.compile("pj-article__tags.*"))
+        if div_article_tags is not None:
+            return div_article_tags.text
+
+        # Alternate way 1
+        news_keywords = self.soup.find("meta", attrs={"name": "keywords"})
+        if news_keywords is not None and "content" in news_keywords.attrs:
+            return news_keywords["content"]
+
+        return None
+
+    def extract_publish_date(self):
+        # Most commonly found
+        authors_date_section = self.soup.find("div", class_="pj-article__detail__authors__date-section")
+        if authors_date_section is not None:
+            time_tag = authors_date_section.find("time")
+            if time_tag is not None:
+                return time_tag.string
+
+        # Alternate way 1
+        article_date_published = self.soup.find("div", class_="pj-article__detail__date-published")
+        if article_date_published is not None:
+            time_tag = article_date_published.find("time")
+            if time_tag is not None:
+                return time_tag.string
+
+        # Last option
+        meta_publish_time = self.soup.find("meta", attrs={"property": "article:published_time"})
+        if meta_publish_time is not None and "content" in meta_publish_time.attrs:
+            return meta_publish_time["content"]
+
+        return None
+
+    def extract_article_text(self):
+        # Most commonly found and found only in this!
+        article_content = self.soup.find("div", class_="pj-article__content")
+        if article_content is not None:
+            article_text = ""
+            for ps in article_content.find_all("p"):
+                para_text = ps.text
+                # Empty string, ignore
+                if len(str(para_text).strip()) == 0:
+                    continue
+
+                # If it has a special anchor tag
+                has_anc = ps.find("a")
+                if has_anc is not None and "ಇದನ್ನೂ ಓದಿ" in para_text:
+                    # Ignore these paragraph
+                    continue
+                elif "ಇನ್ನಷ್ಟು..." in para_text:
+                    break
+                else:
+                    # Append the text
+                    article_text = article_text + para_text + "\n"
+            return article_text
+
+        # Last option
+        return None
     
-def test(base_path, files):
+def test_knd(base_path, files):
     for html_file_path in files:
         print(html_file_path)
         html_text = open(base_path + html_file_path, 'rb').read()
@@ -192,7 +309,7 @@ def test_run1():
         'www.kannadaprabha.com/columns/ರಣಾಂಗಣದ-ನಯ-ನಾಜೂಕು-ಹುಟ್ಟಿಸಿರುವ-ಸಂದೇಹ/43092.html',
         'www.kannadaprabha.com/astrology/ಚಿರ-ಯೌವ್ವನಿಗರಾಗಿ/85409.html'
         ]
-    test(base_path, files)
+    test_knd(base_path, files)
 
 def test_run2():
     base_path = '/home/adiga/my_work/kannada-news-dataset/crawling/test/www.kannadaprabha.com/'
@@ -207,9 +324,41 @@ def test_run2():
         '2020/budget-session-of-parliament-to-commence-on-january-31-409980.html',
         '2021/union-budget-2021-fiscal-deficit-estimated-at-95-of-gdp-for-this-year-438647.html'
         ]
-    test(base_path, files)
+    test_knd(base_path, files)
+
+def test_prj(base_path, files):
+    for html_file_path in files:
+        print(html_file_path)
+        html_text = open(base_path + html_file_path, 'rb').read()
+        parser = PrajavaniParser(html_text, 'http://'+html_file_path)
+        if parser.is_valid_article_page():
+            logger.info('Title: {}'.format(parser.extract_title()))
+            logger.info('Keywords: {}'.format(parser.extract_keywords()))
+            logger.info('Description: {}'.format(parser.extract_description()))
+            logger.info('Publish Date: {}'.format(parser.extract_publish_date()))
+            logger.info('Article Text: {}'.format(parser.extract_article_text()))
+        else:
+            logger.warning('Not a valid article page!')
+        print('-'*50)
+
+def test_run3():
+    base_path = '/home/adiga/my_work/kannada-news-dataset/crawling/test/www.prajavani.net/'
+    files = ['index.html',
+        'article-on-ooty-and-kannada-language-796882.html',
+        'rajnath-singh-says-india-no-longer-a-weak-country-736381.html',
+        '2018/LzIwMTgvMDkvMDEvNTY5OTAz_index.html',
+        '2018/LzIwMTgvMDUvMjYvNTQ1MDg3_index.html',
+        '2018/LzIwMTgvMDYvMjcvNTUyMjA2_index.html',
+        '2019/ban-unions-strike-664152.html',
+        '2019/knowledge-from-research-694131.html',
+        '2019/mla-653311.html',
+        '2020/joe-biden-wins-new-jersey-and-new-york-donald-trump-registering-early-wins-in-key-states-776310.html',
+        '2021/twiter-campaign-to-kodagu-forest-minister-813774.html'
+        ]
+    test_prj(base_path, files)
     
 if __name__ == '__main__':
     conf_parser.log_config
-    test_run1() 
-    test_run2() 
+    # test_run1() 
+    # test_run2() 
+    test_run3() 
