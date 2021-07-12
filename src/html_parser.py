@@ -180,6 +180,7 @@ class PrajavaniParser():
             conf_parser.error_logger.error("Invalid Article! Couldn't detect article validity:{}".format(self.url))
             return False
 
+        # Alternate way 1
         page_type = self.soup.head.find_all('meta', attrs={"property": "og:type"})
         if len(page_type) == 1:
             page_type = page_type[0]
@@ -191,9 +192,13 @@ class PrajavaniParser():
             else:
                 logger.debug("Og Type is not 'article' for this url!")
 
-        else:
-            logger.debug('Page does not seem to contain article: {}'.format(self.url))
+        # Alternate way 2 (A bit hacky way)
+        article_title = self.soup.find("div", class_="pj-article__title")
+        if article_title is not None and len(str(article_title.text).strip()) > 5:
+            return True
 
+        # Last option
+        logger.debug('Page does not seem to contain article: {}'.format(self.url))
         # For debugging these pages
         conf_parser.error_logger.error("Invalid Article! {}".format(self.url))
         return False
@@ -219,6 +224,11 @@ class PrajavaniParser():
     def extract_description(self):
         # Most commonly found in meta
         meta_desc = self.soup.find("meta", attrs={"property": "og:description"})
+        if meta_desc is not None and "content" in meta_desc.attrs:
+            return meta_desc["content"]
+
+        # Alternate way 1
+        meta_desc = self.soup.find("meta", attrs={"name": "description"})
         if meta_desc is not None and "content" in meta_desc.attrs:
             return meta_desc["content"]
         
@@ -247,7 +257,7 @@ class PrajavaniParser():
                 return time_tag.string
 
         # Alternate way 1
-        article_date_published = self.soup.find("div", class_="pj-article__detail__date-published")
+        article_date_published = self.soup.find("div", class_=re.compile("pj-article__detail__date-published.*"))
         if article_date_published is not None:
             time_tag = article_date_published.find("time")
             if time_tag is not None:
@@ -261,11 +271,10 @@ class PrajavaniParser():
         return None
 
     def extract_article_text(self):
-        # Most commonly found and found only in this!
-        article_content = self.soup.find("div", class_="pj-article__content")
-        if article_content is not None:
+        # Extract text from all <p>
+        def __get_article_text(body):
             article_text = ""
-            for ps in article_content.find_all("p"):
+            for ps in body.find_all("p"):
                 para_text = ps.text
                 # Empty string, ignore
                 if len(str(para_text).strip()) == 0:
@@ -282,6 +291,16 @@ class PrajavaniParser():
                     # Append the text
                     article_text = article_text + para_text + "\n"
             return article_text
+
+        # Most commonly found and found only in this!
+        article_content = self.soup.find("div", class_="pj-article__content")
+        if article_content is not None:
+            return __get_article_text(article_content)
+        
+        # Alternate way 1
+        article_field = self.soup.find("div", class_=re.compile("field field-name-body"))
+        if article_field is not None:
+            return __get_article_text(article_field)
 
         # Last option
         return None
@@ -354,6 +373,9 @@ def test_run3():
         '2019/mla-653311.html',
         '2020/joe-biden-wins-new-jersey-and-new-york-donald-trump-registering-early-wins-in-key-states-776310.html',
         '2021/twiter-campaign-to-kodagu-forest-minister-813774.html',
+        'agri-college-quota-misuse-637140.html',
+        'cashewnut-in-north-karnataka-762670.html',
+        'kodagu-falls-664286.html',
         'missing_article/flood-relief-fund_index.html',
         'missing_article/gsqjgs43gsq8_index.html',
         'missing_article/chikkamagalur_index.html',
@@ -363,6 +385,9 @@ def test_run3():
         'missing_article/cartoon-prajavani-chinakurali-coronavirus-covid-vaccine-bjp-773564.html',
         'missing_article/cartoon-covid-19-and-air-pollution-754793.html'
         ]
+
+    files = [
+    ]
     test_prj(base_path, files)
     
 if __name__ == '__main__':
