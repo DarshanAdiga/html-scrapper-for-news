@@ -3,6 +3,13 @@ import yaml
 # For testing
 # SYS_CONFIG=yaml.load(open('config/test_sys_config.yml', 'r'))
 
+#------------------------------
+# Other configurations
+
+# Min length of the article text, to be considered as valid
+ARTICLE_TEXT_LEN_LIMIT = 20
+#------------------------------
+
 # Actual run
 SYS_CONFIG=yaml.load(open('config/prajavani_sys_config.yml', 'r'))
 

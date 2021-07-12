@@ -12,16 +12,24 @@ import conf_parser
 from es_storage import ESStorage
 import time
 
-elastic_conf = conf_parser.SYS_CONFIG['url_index']
+elastic_conf = conf_parser.SYS_CONFIG['article_index']
 es_seed_storage = ESStorage(elastic_conf, read_only=True)
 
-##> Count the URLs whose HTML has already been downloaded
 #----------------------
+##> Count the URLs whose HTML has already been downloaded
 es_query_downloaded = {
     "_source": ["downloaded"],
     "query": {"bool": {"must": [{"term": {"downloaded": "true"} }] } } }
+
+#----------------------
+##> Get the URLs whose article text length is in range
+es_query_text_len = {
+    "_source": ["id"],
+    "query":{"bool":{"must":[{"range":{"text_len":{"gt":"-1","lt":"10"}}}]}}
+    }
+
 # Do a bulk-scroll here
-downloaded_url_itr = es_seed_storage.get_documents(es_query_downloaded, bulk_scroll=True)
+downloaded_url_itr = es_seed_storage.get_documents(es_query_text_len, bulk_scroll=True)
 downloaded_count = 0
 
 # Save the results to a temp file
@@ -31,4 +39,4 @@ for doc in downloaded_url_itr:
     write_file.write(json.dumps(doc) + '\n')
 
 es_seed_storage.close()
-print("Count of docs with 'downloaded'=True: {}".format(downloaded_count))
+print("Count of result docs: {}".format(downloaded_count))

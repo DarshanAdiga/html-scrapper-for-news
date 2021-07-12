@@ -63,13 +63,13 @@ class ArticleParser():
         Otherwise, returns 'None'"""
         parser = self.__get_html_parser(html_text, url)
         if parser.is_valid_article_page():
-            title = parser.extract_title()
-            desc = parser.extract_description()
-            keywords = parser.extract_keywords()
-            pub_date = parser.extract_publish_date()
             art_text = parser.extract_article_text()
-
-            if art_text is not None:
+            # If the page has valid article text
+            if art_text is not None and len(art_text) > conf_parser.ARTICLE_TEXT_LEN_LIMIT:
+                title = parser.extract_title()
+                desc = parser.extract_description()
+                keywords = parser.extract_keywords()
+                pub_date = parser.extract_publish_date()
                 # Make the document
                 article_doc = make_article_doc(url, title, desc, keywords, pub_date, art_text)
                 return article_doc

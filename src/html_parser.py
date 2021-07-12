@@ -353,7 +353,15 @@ def test_run3():
         '2019/knowledge-from-research-694131.html',
         '2019/mla-653311.html',
         '2020/joe-biden-wins-new-jersey-and-new-york-donald-trump-registering-early-wins-in-key-states-776310.html',
-        '2021/twiter-campaign-to-kodagu-forest-minister-813774.html'
+        '2021/twiter-campaign-to-kodagu-forest-minister-813774.html',
+        'missing_article/flood-relief-fund_index.html',
+        'missing_article/gsqjgs43gsq8_index.html',
+        'missing_article/chikkamagalur_index.html',
+        'missing_article/couple-death_index.html',
+        'missing_article/shrimant-patil_index.html',
+        'missing_article/article-features_index.html',
+        'missing_article/cartoon-prajavani-chinakurali-coronavirus-covid-vaccine-bjp-773564.html',
+        'missing_article/cartoon-covid-19-and-air-pollution-754793.html'
         ]
     test_prj(base_path, files)
     
