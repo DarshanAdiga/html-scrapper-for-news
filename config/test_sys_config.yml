@@ -26,6 +26,9 @@ article_index:
   host: localhost
   port: 9200
 
+index_dump_conf:
+  dump_file_path: /home/adiga/my_work/kannada-news-dataset/crawling/dump/run1.jl
+
 log_config:
   level: 'INFO' # Possible values: 'WARNING', 'INFO', 'DEBUG'
   error_log_file: 'logs/test_error.log'

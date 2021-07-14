@@ -3,6 +3,11 @@ import yaml
 # For testing
 # SYS_CONFIG=yaml.load(open('config/test_sys_config.yml', 'r'))
 
+# Actual run
+SYS_CONFIG=yaml.load(open('config/kannadaprabha_sys_config.yml', 'r'))
+#SYS_CONFIG=yaml.load(open('config/prajavani_sys_config.yml', 'r'))
+
+
 #------------------------------
 # Other configurations
 
@@ -10,8 +15,6 @@ import yaml
 ARTICLE_TEXT_LEN_LIMIT = 20
 #------------------------------
 
-# Actual run
-SYS_CONFIG=yaml.load(open('config/prajavani_sys_config.yml', 'r'))
 
 # Configure logging
 import logging
