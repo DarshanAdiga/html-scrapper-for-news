@@ -20,6 +20,7 @@ class IndexDumper():
         res_itr = self.index_storage.get_documents(self.json_query, bulk_scroll=True)
         cnt=0
         for doc in res_itr:
+            doc = doc["_source"]
             doc = json.dumps(doc)
             self.target_storage.save_doc(doc)
             cnt += 1
