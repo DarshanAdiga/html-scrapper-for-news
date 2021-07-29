@@ -21,7 +21,7 @@ article_index:
   port: 9200
 
 index_dump_conf:
-  dump_file_path: /home/ubuntu/work/darshan/kn-work/dumps/run2_kannadaprabha.jl
+  dump_file_path: /home/ubuntu/work/darshan/kn-work/dumps/run2_kannadaprabha_v2.jl
 
 log_config:
   level: 'WARNING' # Possible values: 'WARNING', 'INFO', 'DEBUG'
