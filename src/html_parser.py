@@ -140,13 +140,15 @@ class KannadaPrabhaParser(HtmlParserI):
 
         # Most commonly found
         div_article_text = self.soup.find("div", class_="div_article_text")
+        text_1 = ""
         if div_article_text is not None:
             span = div_article_text.find("span")
             if span is not None and span.text is not None:
-                return span.text
+                text_1 = span.get_text(" ").strip()
         
         # Alternate way 1
         story_content = self.soup.find("div", id="storyContent")
+        text_2 = ""
         if story_content is not None:
             # Remove the divs with class="author_txt" and class="agency_txt"
             author_txt = story_content.find("div", class_="author_txt")
@@ -157,14 +159,21 @@ class KannadaPrabhaParser(HtmlParserI):
                 agency_txt.clear()
 
             if story_content.text is not None:
-                return story_content.text
+                text_2 = story_content.get_text(" ").strip()
+
+        # If one of these have some non-empty text, return the longest one
+        if len(text_1) != 0 or len(text_2) != 0:
+            if len(text_1) > len(text_2):
+                return text_1
+            else:
+                return text_2
 
         # Alternate way 2
         article_text = self.soup.find('div', class_="article_text")
         if article_text is not None:
             span = article_text.find('span')
             if span is not None and span.text is not None:
-                return span.text
+                return span.get_text(" ")
             
         # Last option
         return None
@@ -223,14 +232,14 @@ class PrajavaniParser():
 
     def extract_description(self):
         # Most commonly found in meta
-        meta_desc = self.soup.find("meta", attrs={"property": "og:description"})
+        meta_desc = self.soup.find("meta", attrs={"name": "description"})
         if meta_desc is not None and "content" in meta_desc.attrs:
             return meta_desc["content"]
 
         # Alternate way 1
-        meta_desc = self.soup.find("meta", attrs={"name": "description"})
+        meta_desc = self.soup.find("meta", attrs={"property": "og:description"})
         if meta_desc is not None and "content" in meta_desc.attrs:
-            return meta_desc["content"]
+            return meta_desc["content"]        
         
         # Last option
         return None
@@ -239,7 +248,7 @@ class PrajavaniParser():
         # Most commonly found
         div_article_tags = self.soup.find("div", class_=re.compile("pj-article__tags.*"))
         if div_article_tags is not None:
-            return div_article_tags.text
+            return div_article_tags.get_text(",")
 
         # Alternate way 1
         news_keywords = self.soup.find("meta", attrs={"name": "keywords"})
@@ -275,21 +284,32 @@ class PrajavaniParser():
         def __get_article_text(body):
             article_text = ""
             for ps in body.find_all("p"):
-                para_text = ps.text
+                para_text = ps.get_text(" ")
                 # Empty string, ignore
                 if len(str(para_text).strip()) == 0:
                     continue
 
-                # If it has a special anchor tag
-                has_anc = ps.find("a")
-                if has_anc is not None and "ಇದನ್ನೂ ಓದಿ" in para_text:
-                    # Ignore these paragraph
+                # If the text in this ps is same as that of first <a>, then this 'ps'
+                #  does not contain anything else, so ignore it
+                first_a = ps.find("a")
+                if first_a is not None and len(para_text) <= len(first_a.text):
                     continue
-                elif "ಇನ್ನಷ್ಟು..." in para_text:
-                    break
-                else:
-                    # Append the text
-                    article_text = article_text + para_text + "\n"
+
+                # Clear the intermediate links
+                if "ಇದನ್ನೂ ಓದಿ" in para_text or "ಇನ್ನಷ್ಟು..." in para_text:
+                    all_a = ps.find_all("a")
+                    for a in all_a:
+                        # Remove the anchor text
+                        a.clear()
+                    # Recapture the whole text
+                    para_text = ps.get_text(" ")
+                    # Remove special texts
+                    para_text = para_text.replace("ಇದನ್ನೂ ಓದಿ:", "") \
+                        .replace("ಇದನ್ನೂ ಓದಿ...", "") \
+                        .replace("ಇದನ್ನೂ ಓದಿ", "") \
+                        .replace("ಇನ್ನಷ್ಟು...", "")
+
+                article_text = article_text + para_text + "\n"
             return article_text
 
         # Most commonly found and found only in this!
@@ -341,7 +361,9 @@ def test_run2():
         '2018/loan-waiver-or-not-meet-our-demands-organisations/319541.html',
         '2019/karnataka-budget-2019-jetty-to-be-constructed-at-malpe/333491.html',
         '2020/budget-session-of-parliament-to-commence-on-january-31-409980.html',
-        '2021/union-budget-2021-fiscal-deficit-estimated-at-95-of-gdp-for-this-year-438647.html'
+        '2021/union-budget-2021-fiscal-deficit-estimated-at-95-of-gdp-for-this-year-438647.html',
+        'small_article/how-will-india-pakistan-conflict-impact-economy-countries-that-support-india-here-is-all-you-need-to-know-333612.html',
+        'small_article/is-donald-trump-gearing-up-for-currency-war-here-is-all-you-need-to-know-342071.html'
         ]
     test_knd(base_path, files)
 
@@ -383,11 +405,11 @@ def test_run3():
         'missing_article/shrimant-patil_index.html',
         'missing_article/article-features_index.html',
         'missing_article/cartoon-prajavani-chinakurali-coronavirus-covid-vaccine-bjp-773564.html',
-        'missing_article/cartoon-covid-19-and-air-pollution-754793.html'
+        'missing_article/cartoon-covid-19-and-air-pollution-754793.html',
+        'small_article/LzIwMTgvMTAvMDgvNTc5NDkx_index.html',
+        'small_article/no-surprise-if-shiv-sena-comes-to-power-in-delhi-too-says-sanjay-raut-685666.html'
         ]
 
-    files = [
-    ]
     test_prj(base_path, files)
     
 if __name__ == '__main__':

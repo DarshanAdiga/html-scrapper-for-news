@@ -16,7 +16,7 @@ url_index:
   port: 9200
 
 article_index:
-  index: run2_articles
+  index: run2_articles_v2
   host: localhost
   port: 9200
 

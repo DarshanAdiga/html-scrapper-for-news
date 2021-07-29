@@ -49,4 +49,8 @@ docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL 
   [ ] Space in the html file paths! During extraction:
       Ex: "cricket/rishabh-pant-surpasses-ms dhoni-creates-another-record/330223.html"
 [X] Avoid small texts, duplicate text snippets
-* Crawl the uncrawled URLs and save HTML
+[X] Filter out the the documents where text_len < 100 for both websites
+[X] Fix the html parsers
+[ ] Re-run the extractor on both websites and create new article indices
+
+[ ] Crawl the uncrawled URLs and save HTML
