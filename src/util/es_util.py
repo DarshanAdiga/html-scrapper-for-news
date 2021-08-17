@@ -12,7 +12,7 @@ import conf_parser
 from es_storage import ESStorage
 import time
 
-elastic_conf = conf_parser.SYS_CONFIG['article_index']
+elastic_conf = conf_parser.SYS_CONFIG['url_index']
 es_seed_storage = ESStorage(elastic_conf, read_only=True)
 
 #----------------------
@@ -29,7 +29,7 @@ es_query_text_len = {
     }
 
 # Do a bulk-scroll here
-downloaded_url_itr = es_seed_storage.get_documents(es_query_text_len, bulk_scroll=True)
+downloaded_url_itr = es_seed_storage.get_documents(es_query_downloaded, bulk_scroll=True)
 downloaded_count = 0
 
 # Save the results to a temp file

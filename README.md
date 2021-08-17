@@ -54,3 +54,7 @@ docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL 
 [X] Re-run the extractor on both websites and create new article indices (index suffix _v2)
 
 [ ] Crawl the uncrawled URLs and save HTML
+
+### Vijayakarnataka Todos
+#### Link Extractor
+- There are html files not ending with .html

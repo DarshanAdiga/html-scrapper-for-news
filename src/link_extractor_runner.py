@@ -23,7 +23,10 @@ def test():
         logger.info(lnk)
 
 def get_all_html_file_paths(website_base_dir):
-    return list(glob.glob(website_base_dir+'/**/*.html',recursive = True))
+    html_files = list(glob.glob(website_base_dir+'/**/*.html',recursive = True))
+    cms_files = list(glob.glob(website_base_dir+'/**/*.cms',recursive = True))
+    return html_files + cms_files
+
 
 def run_full(run_name, base_url, website_base_dir, extractor: LinkExtractor, \
     url_storage: StorageI, filter_domains=[]):
