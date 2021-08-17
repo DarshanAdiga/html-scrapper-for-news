@@ -1,0 +1,28 @@
+# All Configurations
+#-------------------
+# Run Configurations
+run_config:
+  run_name: run4
+  base_url: https://vijaykarnataka.com/
+  website_enum: 'vijaykarnataka' # Website identifier
+  website_base_dir: /home/ubuntu/work/darshan/kn-work/vijayakarnataka/run4/websites/vijaykarnataka.com/
+  filter_domains:
+    - 'vijaykarnataka'
+
+# To store the URLs
+url_index:
+  index: run4_seed_urls
+  host: localhost
+  port: 9200
+
+article_index:
+  index: run4_articles
+  host: localhost
+  port: 9200
+
+index_dump_conf:
+  dump_file_path: /home/ubuntu/work/darshan/kn-work/dumps/run4_vijaykarnataka.jl
+
+log_config:
+  level: 'WARNING' # Possible values: 'WARNING', 'INFO', 'DEBUG'
+  error_log_file: 'logs/run4_error.log'
