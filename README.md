@@ -1,6 +1,26 @@
-# Scrapper Tools used to prepare the Kannada News Dataset
+# A Generic Scrapper Tool used to prepare the Kannada News Dataset
 This project includes various code bases used to acquire, clean, and structure the Kannada news dataset. 
 
+## Storage
+ElasticSearch is used to store the extracted URLs and the text data. Separate indexes are used for different purposes.
+Generally,
+* `id` field indicates the unique ID
+* `source` field contains the short name of the origin news paper
+
+For details about the indices, check `config/sys_config.yml`.
+
+The ElasticSearch Container is configured to store the data at `ES_SAMPLE_DATA/` directory.
+
+### easticsearch Container Setup
+The elasticsearch docker container version `7.6.1` is used. More details: https://hub.docker.com/_/elasticsearch/
+
+Start the elastic search container using
+```bash
+docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL PATH>:/usr/share/elasticsearch/data -e "discovery.type=single-node" elasticsearch:7.6.1
+```
+*Note:* Make sure <**LOCAL DIR FULL PATH**> is present
+
+# Steps to crawl and extract the news article text
 ## Preprocessing
 The `src/util/` folder includes various cleanup scripts to be run on the website dump, before running the extractors.
 1. To fix the directories with name ending with `.html` and contains `index.html` inside it, use `src/util/move_html_directory_to_file.py`
@@ -23,38 +43,18 @@ Fetch the data from article-index and save to a JL file on local system.
 ### Entry Point
 ```python3 src/get_index_dump.py```
 
-
-## Storage
-ElasticSearch is used to store the extracted URLs and the text data. Separate indexes are used for different purposes.
-Generally,
-* `id` field indicates the unique ID
-* `source` field contains the short name of the origin news paper
-
-For details about the indices, check `config/sys_config.yml`.
-
-The ElasticSearch Container is configured to store the data at `ES_SAMPLE_DATA/` directory.
-
-### easticsearch Container Setup
-The elasticsearch docker container version `7.6.1` is used. More details: https://hub.docker.com/_/elasticsearch/
-
-Start the elastic search container using
-```bash
-docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -v <LOCAL DIR FULL PATH>:/usr/share/elasticsearch/data -e "discovery.type=single-node" elasticsearch:7.6.1
-```
-*Note:* Make sure <**LOCAL DIR FULL PATH**> is present
-
 ## TODO
-[X] Index the URLs (along with origin-page URL for reference)
-[X] Fix common issues in article-extraction
-  [ ] Space in the html file paths! During extraction:
-      Ex: "cricket/rishabh-pant-surpasses-ms dhoni-creates-another-record/330223.html"
-[X] Avoid small texts, duplicate text snippets
-[X] Filter out the the documents where text_len < 100 for both websites
-[X] Fix the html parsers
-[X] Re-run the extractor on both websites and create new article indices (index suffix _v2)
+[X] Index the URLs (along with origin-page URL for reference)  
+[X] Fix common issues in article-extraction  
+  [ ] Space in the html file paths! During extraction:  
+      Ex: "cricket/rishabh-pant-surpasses-ms dhoni-creates-another-record/330223.html"  
+[X] Avoid small texts, duplicate text snippets  
+[X] Filter out the the documents where text_len < 100 for both websites  
+[X] Fix the html parsers  
+[X] Re-run the extractor on both websites and create new article indices (index suffix _v2)  
 
 [ ] Crawl the uncrawled URLs and save HTML
 
-### Vijayakarnataka Todos
-#### Link Extractor
-- There are html files not ending with .html
+### [On Going] Vijayakarnataka TODOs
+#### Link Extractor related issues
+[X] There are html files not ending with .html(like .cms)
