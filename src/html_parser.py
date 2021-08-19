@@ -526,8 +526,11 @@ class VijayakarnatakaParser():
                                 article_text = article_text + ch.text
                     # Div tag with image or ad, ignore it
                     elif ch.name == 'div':
-                        cls_str = ' '.join(ch["class"])
-                        if 'img' in cls_str or 'ad' in cls_str:
+                        if "class" in ch.attrs:
+                            cls_str = ' '.join(ch["class"])
+                        else:
+                            cls_str = None
+                        if cls_str is not None and ('img' in cls_str or 'ad' in cls_str):
                             pass
                         else:
                             article_text = article_text + ch.text
@@ -711,7 +714,8 @@ def test_run4():
         'html/Dell-Vostro-15-3568-A553113UIN9-Laptop-Core-i5-7th-Gen8-GB1-TBLinux2-GB_index.html',
         'tech/Dell-Inspiron-14-3467-A561201UIN9-Laptop-Core-i3-6th-Gen4-GB1-TBLinux_index.html',
         'tech/RX-5600M120-Hz-G5-5505-Gaming-Laptop-156-inch-Silver-25-kg-D560323HIN9S_index.html',
-        'topics/ರಾಧಿಕಾ-ಹೆಗಡೆ-ಹುಳಗೋಳ_index.html'
+        'topics/ರಾಧಿಕಾ-ಹೆಗಡೆ-ಹುಳಗೋಳ_index.html',
+        'err/76149333.cms.html'
         ]
 
     test_vij(base_path, files)
