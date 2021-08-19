@@ -1,5 +1,5 @@
 # A Generic Scrapper Tool used to prepare the Kannada News Dataset
-This project includes various code bases used to acquire, clean, and structure the Kannada news dataset. 
+This project implements a pipeline to acquire, clean, and structure the Kannada news dataset. 
 
 ## Storage
 ElasticSearch is used to store the extracted URLs and the text data. Separate indexes are used for different purposes.

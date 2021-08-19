@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 from storage import StorageI
 from es_doc_maker import make_article_doc
 import conf_parser
-from html_parser import Website, KannadaPrabhaParser, PrajavaniParser
+from html_parser import Website, KannadaPrabhaParser, PrajavaniParser, VijayakarnatakaParser
 
 class URLLookup():
     """Helper class that defines url-lookup. Currently, it uses in-memory set for lookup.
@@ -52,6 +52,8 @@ class ArticleParser():
             return KannadaPrabhaParser(html_text, url)
         elif self.website == Website.PRAJAVANI:
             return PrajavaniParser(html_text, url)
+        elif self.website == Website.VIJAYAKARNATAKA:
+            return VijayakarnatakaParser(html_text, url)
         # Other parsers go here
         else:
             return None
